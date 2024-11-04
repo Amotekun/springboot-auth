@@ -13,6 +13,7 @@ public class User {
     private String role;
     private boolean isVerified;
     private String activationToken;
+    private String refreshToken;
 
     public User () {
         this.id = UUID.randomUUID().toString();
@@ -74,4 +75,13 @@ public class User {
     public String getActivationToken() {
         return activationToken;
     }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    };
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
 }

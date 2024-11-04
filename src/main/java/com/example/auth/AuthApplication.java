@@ -28,7 +28,10 @@ public class AuthApplication {
 			System.exit(1); // Ensure the app stops if the property isn't found
 		}
 
+		System.getenv().forEach((key, value) -> {
+			System.out.println(key + ": " + value);
+		});
+
 		SpringApplication.run(AuthApplication.class, args);
 	}
-
 }

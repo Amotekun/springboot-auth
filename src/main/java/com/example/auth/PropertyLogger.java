@@ -21,6 +21,19 @@ public class PropertyLogger implements CommandLineRunner {
     @Value("${rsa.private-key}")
     private String rsaPrivateKey;
 
+    @Value("${spring.mail.host}")
+    private  String mailHost;
+
+    @Value("${spring.mail.port}")
+    private  String mailPort;
+
+    @Value("${spring.mail.username}")
+    private  String mailUsername;
+
+    @Value("${spring.mail.password}")
+    private  String mailPassword;
+
+
     @Override
     public void run(String... args) {
         logger.info("""
@@ -31,6 +44,16 @@ public class PropertyLogger implements CommandLineRunner {
                         RSA Private Key Path: {}
                         ================================""",
                 appName, datasourceUrl, rsaPrivateKey
+                );
+
+        logger.info("""
+                ==========================
+                Mail Host: {}
+                Mail Port: {}
+                Mail Username: {}
+                Mail Password: {}
+                ==========================""",
+                mailHost, mailPort, mailUsername, mailPassword
                 );
     }
 }

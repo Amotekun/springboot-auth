@@ -43,6 +43,7 @@ public class UserRepository  {
         }
     }
 
+    // ACTIVATION TOKEN IMPLEMENTATION
     public Optional<User> findByActivationToken(String token) {
         String sql = "SELECT * FROM users WHERE activationToken = ?";
         List<User> user = jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToUser(rs), token);
@@ -63,10 +64,39 @@ public class UserRepository  {
 
     }
 
+    // === ACTIVATION TOKEN END ===
+
     public void save(User user) {
-        String sql = "INSERT INTO users(username, password, email, activationToken) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, user.getUsername(), user.getPassword(), user.getEmail(), user.getActivationToken());
+        String sql = "INSERT INTO users(id, username, password, email, activationToken, isVerified, role) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(
+                sql,
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                user.getEmail(),
+                user.getActivationToken(),
+                user.getIsVerified() ? 1 : 0, // Convert boolean to tinyint
+                user.getRole() != null ? user.getRole() : "USER"
+        );
     }
+
+    // REFRESH TOKEN IMPLEMENTATION
+    public Optional<User> findByRefreshToken(String refreshToken) {
+        String sql = "SELECT * FROM users WHERE refreshToken = ?";
+        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToUser(rs), refreshToken);
+        return users.isEmpty() ? Optional.empty() : Optional.of(users.getFirst());
+    }
+
+    public void updateRefreshToken(String username, String refreshToken) {
+        String sql = "UPDATE users SET refreshToken = ? WHERE username = ?";
+        jdbcTemplate.update(sql, refreshToken, username);
+    }
+
+    public void clearRefreshToken(String username) {
+        String sql = "UPDATE users SET refreshToken = NULL WHERE username = ?";
+        jdbcTemplate.update(sql, username);
+    }
+
 
 
     private User mapRowToUser(ResultSet rs) throws SQLException {
@@ -76,6 +106,7 @@ public class UserRepository  {
         user.setUsername(rs.getString("username"));
         user.setPassword(rs.getString("password"));
         user.setRole(rs.getString("role"));
+        user.setRefreshToken(rs.getString("refreshToken"));
 
         return user;
     }
