@@ -28,4 +28,18 @@ public class EmailService {
         helper.setFrom("noreply@example.com");
         mailSender.send(message);
     }
+
+    public void sendPasswordResetEmail(String to, String resetLink) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+        String htmlMsg = "<h3> Password Reset </h3>"
+                + "<p> Click the link below to reset your password. The link expires in 15 minutes: </p>"
+                + "<a href=\"" + resetLink + "\"> Reset Password </a>";
+
+        helper.setText(htmlMsg, true);
+        helper.setTo(to);
+        helper.setSubject("Password Reset Request");
+        helper.setFrom("noreply@example.com");
+        mailSender.send(message);
+    }
 }

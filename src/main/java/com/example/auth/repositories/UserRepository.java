@@ -43,6 +43,18 @@ public class UserRepository  {
         }
     }
 
+    public Optional<User> findByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+
+        List<User> user = jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToUser(rs), email);
+
+        if (user.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(user.getFirst());
+        }
+    }
+
     // ACTIVATION TOKEN IMPLEMENTATION
     public Optional<User> findByActivationToken(String token) {
         String sql = "SELECT * FROM users WHERE activationToken = ?";
@@ -110,5 +122,4 @@ public class UserRepository  {
 
         return user;
     }
-
 }

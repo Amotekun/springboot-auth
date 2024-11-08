@@ -1,6 +1,8 @@
 package com.example.auth.controllers;
 
+import com.example.auth.entities.PasswordReset;
 import com.example.auth.entities.User;
+import com.example.auth.services.PasswordResetService;
 import com.example.auth.services.TokenService;
 import com.example.auth.services.UserService;
 import com.example.auth.services.EmailService;
@@ -34,6 +36,7 @@ public class UserControllers {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenService tokenService;
+    private final PasswordResetService passwordResetService;
 
     @Value("${application.url}")
     private String appUrl;
@@ -41,6 +44,7 @@ public class UserControllers {
     public UserControllers(
             UserService userService,
             EmailService emailService,
+            PasswordResetService passwordResetService,
             AuthenticationManager authenticationManager,
             JwtTokenProvider jwtTokenProvider,
             TokenService tokenService
@@ -50,6 +54,7 @@ public class UserControllers {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.tokenService = tokenService;
+        this.passwordResetService = passwordResetService;
     }
 
     @GetMapping("/")
@@ -155,6 +160,20 @@ public class UserControllers {
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> requestPasswordReset(@RequestBody Map<String, String> credentials) {
+        String email = credentials.get("email");
+
+        try {
+            passwordResetService.createPasswordResetToken(email);
+            return ResponseEntity.ok("Password reset email sent.");
+        } catch (MessagingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send password reset email.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 
     @GetMapping("/user")
     public ResponseEntity<?> getUser(Authentication authentication) {
@@ -173,3 +192,4 @@ public class UserControllers {
         ));
     }
 }
+
