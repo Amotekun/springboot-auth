@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class JwtTokenProvider {
+public class JwtTokenUtility {
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
     @Autowired
-    public JwtTokenProvider(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder) {
+    public JwtTokenUtility(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder) {
         this.jwtEncoder = jwtEncoder;
         this.jwtDecoder = jwtDecoder;
     }

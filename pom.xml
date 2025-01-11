@@ -60,13 +60,30 @@
 			<artifactId>dotenv-java</artifactId>
 			<version>3.0.0</version>
 		</dependency>
+		<dependency>
 
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>8.25.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.12.0</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
@@ -89,7 +106,6 @@
 			<version>0.11.2</version>
 			<scope>runtime</scope>
 		</dependency>
-
 
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>

@@ -3,21 +3,23 @@ package com.example.auth.entities;
 import java.time.Instant;
 import java.util.UUID;
 
-public class PasswordReset {
+public class TwoFactorTokenEntity {
     private String id;
     private String userId;
-    private String token;
+    private String hashedOtp;
     private Instant expiresAt;
+    private Integer attemptCount;
 
-    public PasswordReset() {
+    public TwoFactorTokenEntity() {
         this.id = UUID.randomUUID().toString();
     }
 
-    public PasswordReset(String userId, String token, Instant expiresAt) {
+    public TwoFactorTokenEntity(String userId, String hashedOtp, Instant expiresAt) {
         this();
         this.userId = userId;
-        this.token = token;
+        this.hashedOtp = hashedOtp;
         this.expiresAt = expiresAt;
+        this.attemptCount = 0;
     }
 
     public void setId(String id) {
@@ -28,7 +30,7 @@ public class PasswordReset {
         return id;
     }
 
-    public void setUserId(String user_id) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -36,19 +38,16 @@ public class PasswordReset {
         return userId;
     }
 
-
     public void setToken(String token) {
-        this.token = token;
+        this.hashedOtp = token;
     }
 
     public String getToken() {
-        return token;
+        return hashedOtp;
     }
 
+    public  Integer getAttemptCount() {return attemptCount;}
 
-    public void setExpiresAt(Instant expiresAt) {
-        this.expiresAt = expiresAt;
-    }
 
     public Instant getExpiresAt() {
         return expiresAt;

@@ -1,57 +1,62 @@
 package com.example.auth.services;
 
 
-import com.example.auth.customs.CustomUserDetails;
-import com.example.auth.entities.User;
-import com.example.auth.exception.UserIDNotFoundException;
+import com.example.auth.entities.UserEntity;
 import com.example.auth.exception.UsernameAlreadyExistsException;
 import com.example.auth.repositories.UserRepository;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import com.example.auth.util.TokenUtility;
+import jakarta.mail.MessagingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
-public class UserService implements UserDetailsService {
+public class UserService {
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TokenUtility tokenUtility;
+    private final EmailService emailService;
 
 
     public UserService(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            TokenUtility tokenUtility,
+            PasswordEncoder passwordEncoder,
+            EmailService emailService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+        this.tokenUtility = tokenUtility;
     }
 
+    @Transactional
+    public String register(UserEntity userEntity, String appUrl) {
+        if (userRepository.findByUsername(userEntity.getUsername()).isPresent()) {
+            throw new UsernameAlreadyExistsException();
+        };
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found!"));
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+        userEntity.setActivationToken(tokenUtility.generateToken());
+        userEntity.setIsVerified(false);
+        userRepository.save(userEntity);
 
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLES_" + user.getRole()));
+        String activationLink = appUrl + "/activation?token=" + userEntity.getActivationToken();
 
-        return new CustomUserDetails(user, authorities);
-    }
+        try {
+            emailService.sendActivationEmail(userEntity.getEmail(), activationLink);
+        } catch (MessagingException e) {
+            throw new IllegalStateException("Failed to send activation email", e);
+        }
 
-    public UserDetails loadUserById(String id) throws RuntimeException {
-        var user = userRepository.findById(id)
-                .orElseThrow(() -> new UserIDNotFoundException(id));
-
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLES_" + user.getRole()));
-
-        return new CustomUserDetails(user, authorities);
+        return "User created. Please check your email to activate your account";
     }
 
     @Transactional
@@ -61,39 +66,6 @@ public class UserService implements UserDetailsService {
             userRepository.verifyUser(token);
             return true;
         }
-
         return false;
-    }
-
-    @Transactional
-    public void verifyUserLogin(String email) {
-        boolean isVerified = userRepository.isUserVerified(email);
-
-        if (!isVerified) {
-            throw new IllegalStateException("User account is not verified");
-        }
-    }
-
-    @Transactional
-    public String createUser(User user) {
-        var existingUser = userRepository.findByUsername(user.getUsername());
-
-        if (existingUser.isPresent()) {
-            throw new UsernameAlreadyExistsException();
-        }
-
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        String activationToken = UUID.randomUUID().toString();
-        user.setActivationToken(activationToken);
-        user.setIsVerified(false);
-
-        System.out.println("Generate token: " + activationToken);
-
-        userRepository.save(user);
-
-        System.out.println("Saved user with token: " + user.getActivationToken());
-
-        return activationToken;
     }
 }

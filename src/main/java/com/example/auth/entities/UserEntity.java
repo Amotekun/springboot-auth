@@ -3,7 +3,7 @@ package com.example.auth.entities;
 
 import java.util.UUID;
 
-public class User {
+public class UserEntity {
 
 
     private String id;
@@ -14,8 +14,9 @@ public class User {
     private boolean isVerified;
     private String activationToken;
     private String refreshToken;
+    private boolean twoFactorEnabled;
 
-    public User () {
+    public UserEntity() {
         this.id = UUID.randomUUID().toString();
     }
 
@@ -84,4 +85,14 @@ public class User {
         return refreshToken;
     }
 
+    public boolean twoFactorEnabled() {
+        return twoFactorEnabled;
+    }
+
+    public void setTwoFactorEnabled(boolean twoFactorEnabled) {
+        this.twoFactorEnabled = twoFactorEnabled;
+    }
 }
+
+
+

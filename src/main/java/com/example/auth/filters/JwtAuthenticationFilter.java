@@ -1,7 +1,7 @@
 package com.example.auth.filters;
 
 
-import com.example.auth.util.JwtTokenProvider;
+import com.example.auth.util.JwtTokenUtility;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,11 +18,11 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenUtility jwtTokenUtility;
 
     @Autowired
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
+    public JwtAuthenticationFilter(JwtTokenUtility jwtTokenUtility) {
+        this.jwtTokenUtility = jwtTokenUtility;
     }
 
     @Override
@@ -38,8 +38,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
 
-            if (jwtTokenProvider.validateToken(token)) {
-                Authentication authentication = jwtTokenProvider.getAuthentication(token);
+            if (jwtTokenUtility.validateToken(token)) {
+                Authentication authentication = jwtTokenUtility.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
